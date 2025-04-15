@@ -36,7 +36,4 @@ public class TransactionController {
         service.clearTransactions();
         return ResponseEntity.ok().build();
     }
-
-
-
 }
