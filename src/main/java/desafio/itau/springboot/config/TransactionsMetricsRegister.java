@@ -1,34 +1,27 @@
 package desafio.itau.springboot.config;
 
 import desafio.itau.springboot.service.TransactionService;
-import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import jakarta.annotation.PostConstruct;
+import org.springframework.stereotype.Component;
 
-
-@Configuration
-public class TransactionsMetricsConfiguration {
+@Component
+public class TransactionsMetricsRegister {
 
     private final TransactionService service;
     private final MeterRegistry meterRegistry;
 
-    public TransactionsMetricsConfiguration(TransactionService service, MeterRegistry meterRegistry) {
+    public TransactionsMetricsRegister(TransactionService service, MeterRegistry meterRegistry) {
         this.service = service;
         this.meterRegistry = meterRegistry;
     }
-    @Bean
-    public Counter transactionCounter() {
-        return Counter.builder("transactions.count")
-                .description("Número total de transações processadas")
-                .register(meterRegistry);
-    }
-    @Bean
-    public void registerTransactionsMetrics(){
+
+    @PostConstruct
+    public void registerMetrics() {
         Gauge.builder("transactions.last_minute.count", service,
-                service -> service.getStatistics().getCount())
-                .description("Total de transações no último minuto")
+                        service -> service.getStatistics().getCount())
+                .description("Número de transações no último minuto")
                 .register(meterRegistry);
 
         Gauge.builder("transactions.last_minute.sum", service,
@@ -42,5 +35,3 @@ public class TransactionsMetricsConfiguration {
                 .register(meterRegistry);
     }
 }
-
-
